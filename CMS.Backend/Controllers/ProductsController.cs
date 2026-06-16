@@ -15,10 +15,29 @@ namespace CMS.Backend.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Lấy danh sách sản phẩm (có hỗ trợ tìm kiếm và lọc theo danh mục)
+        /// </summary>
+        /// <param name="search">Từ khóa tìm kiếm theo tên sản phẩm</param>
+        /// <param name="categoryId">ID của danh mục cần lọc</param>
+        /// <returns>Danh sách sản phẩm</returns>
         [HttpGet]
-        public IActionResult GetAll()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public IActionResult GetAll([FromQuery] string? search = null, [FromQuery] int? categoryId = null)
         {
-            var products = _context.Products
+            var query = _context.Products.AsQueryable();
+
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                query = query.Where(p => p.CategoryProductId == categoryId.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(p => p.Name.Contains(search));
+            }
+
+            var products = query
                 .OrderByDescending(p => p.Id)
                 .Select(p => new {
                     p.Id,

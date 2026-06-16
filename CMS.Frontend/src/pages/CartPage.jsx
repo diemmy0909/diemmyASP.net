@@ -12,18 +12,28 @@ function CartPage() {
     setCart(JSON.parse(localStorage.getItem('cart')) || []);
   }, []);
 
+  const getImg = (url) => {
+    if (!url) return 'https://via.placeholder.com/90';
+    return url.startsWith('http') ? url : `http://localhost:5188${url}`;
+  };
+
+  const formatPrice = (price) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+
   const updateQuantity = (index, delta) => {
     const newCart = [...cart];
     newCart[index].quantity += delta;
     if (newCart[index].quantity < 1) newCart[index].quantity = 1;
     setCart(newCart);
     localStorage.setItem('cart', JSON.stringify(newCart));
+    window.dispatchEvent(new Event('storage'));
   };
 
   const removeItem = (index) => {
     const newCart = cart.filter((_, i) => i !== index);
     setCart(newCart);
     localStorage.setItem('cart', JSON.stringify(newCart));
+    window.dispatchEvent(new Event('storage'));
   };
 
   const handleCheckout = () => {
@@ -32,12 +42,11 @@ function CartPage() {
       navigate('/login');
       return;
     }
-
     if (cart.length === 0) return;
 
     const payload = {
       customerId: customerInfo.id,
-      notes: notes,
+      notes,
       items: cart.map(item => ({
         productId: item.productId,
         quantity: item.quantity,
@@ -47,80 +56,78 @@ function CartPage() {
 
     api.post('/orders', payload)
       .then(res => {
-        alert(res.data.message);
+        alert(res.data.message || 'Đặt hàng thành công!');
         localStorage.removeItem('cart');
         setCart([]);
+        window.dispatchEvent(new Event('storage'));
         navigate('/');
       })
-      .catch(err => {
-        alert(err.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng');
-      });
+      .catch(err => alert(err.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng'));
   };
 
-  const totalAmount = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const totalAmount = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
   return (
     <div className="container section-padding">
-      <h1 className="section-title">Giỏ Hàng Của Bạn</h1>
-      
+      <h1 className="page-title">Giỏ Hàng Của Bạn</h1>
+
       {cart.length === 0 ? (
-        <div className="glass-card text-center animate-fade-in" style={{ padding: '60px 20px' }}>
-          <h2 style={{ marginBottom: '20px', color: 'var(--text-muted)' }}>Giỏ hàng đang trống</h2>
-          <Link to="/products" className="btn-primary">Tiếp tục mua sắm</Link>
+        <div className="empty-cart-box">
+          <h2>Giỏ hàng đang trống</h2>
+          <Link to="/products" className="btn-go-shop">Tiếp tục mua sắm</Link>
         </div>
       ) : (
-        <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap' }}>
-          <div style={{ flex: '2', minWidth: '300px' }} className="animate-fade-in">
+        <div className="cart-wrapper">
+          {/* Items */}
+          <div className="cart-items">
             {cart.map((item, index) => (
-              <div key={index} className="glass-card" style={{ display: 'flex', gap: '20px', marginBottom: '20px', alignItems: 'center' }}>
-                <img 
-                  src={item.imageUrl ? `https://localhost:7296${item.imageUrl}` : 'https://via.placeholder.com/100'} 
-                  alt={item.name} 
-                  style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }} 
-                />
-                <div style={{ flex: '1' }}>
-                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>{item.name}</h3>
-                  <p className="price" style={{ fontSize: '1.2rem', marginBottom: '0' }}>{item.price.toLocaleString()} đ</p>
+              <div key={index} className="cart-item">
+                <img src={getImg(item.imageUrl)} alt={item.name} />
+                <div className="cart-item-info">
+                  <div className="cart-item-name">{item.name}</div>
+                  <div className="cart-item-price">{formatPrice(item.price)}</div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--glass-border)', borderRadius: '6px' }}>
-                  <button style={{ padding: '5px 12px', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }} onClick={() => updateQuantity(index, -1)}>-</button>
-                  <span style={{ padding: '5px 15px', borderLeft: '1px solid var(--glass-border)', borderRight: '1px solid var(--glass-border)' }}>{item.quantity}</span>
-                  <button style={{ padding: '5px 12px', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }} onClick={() => updateQuantity(index, 1)}>+</button>
+                <div className="cart-qty-control">
+                  <button className="cart-qty-btn" onClick={() => updateQuantity(index, -1)}>−</button>
+                  <span className="cart-qty-val">{item.quantity}</span>
+                  <button className="cart-qty-btn" onClick={() => updateQuantity(index, 1)}>+</button>
                 </div>
-                <button onClick={() => removeItem(index)} style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '1.5rem', cursor: 'pointer', padding: '10px' }}>&times;</button>
+                <button className="cart-remove-btn" onClick={() => removeItem(index)}>×</button>
               </div>
             ))}
           </div>
 
-          <div style={{ flex: '1', minWidth: '300px' }} className="animate-fade-in">
-            <div className="glass-card" style={{ position: 'sticky', top: '100px' }}>
-              <h3 style={{ marginBottom: '20px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '15px' }}>Tổng quan đơn hàng</h3>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', color: 'var(--text-muted)' }}>
-                <span>Tạm tính:</span>
-                <span>{totalAmount.toLocaleString()} đ</span>
+          {/* Summary */}
+          <div className="cart-summary">
+            <div className="summary-card">
+              <h3 style={{ marginBottom: '20px', fontSize: '18px', fontWeight: '700' }}>Tổng quan đơn hàng</h3>
+
+              <div className="summary-row">
+                <span>Tạm tính ({cart.length} sản phẩm):</span>
+                <span>{formatPrice(totalAmount)}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', color: 'var(--text-muted)' }}>
+              <div className="summary-row">
                 <span>Phí giao hàng:</span>
-                <span>Miễn phí</span>
+                <span style={{ color: '#16a34a', fontWeight: '600' }}>Miễn phí</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px', borderTop: '1px solid var(--glass-border)', paddingTop: '15px' }}>
-                <span style={{ fontSize: '1.2rem', fontWeight: '600' }}>Tổng cộng:</span>
-                <span className="price" style={{ fontSize: '1.5rem', margin: '0' }}>{totalAmount.toLocaleString()} đ</span>
+              <div className="summary-total">
+                <span>Tổng cộng:</span>
+                <span className="summary-total-price">{formatPrice(totalAmount)}</span>
               </div>
 
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '10px', color: 'var(--text-muted)' }}>Ghi chú đơn hàng:</label>
-                <textarea 
-                  className="form-control" 
-                  rows="3" 
-                  style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--glass-border)', color: '#fff', padding: '10px', borderRadius: '6px' }}
+              <div style={{ marginBottom: '18px' }}>
+                <label className="form-label">Ghi chú đơn hàng:</label>
+                <textarea
+                  className="form-input form-textarea"
+                  rows="3"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                ></textarea>
+                  placeholder="Ghi chú thêm cho người bán..."
+                />
               </div>
 
-              <button className="btn-primary" style={{ width: '100%', padding: '15px', fontSize: '1.1rem' }} onClick={handleCheckout}>
-                Tiến Hành Đặt Hàng
+              <button className="checkout-btn" onClick={handleCheckout}>
+                Tiến Hành Đặt Hàng →
               </button>
             </div>
           </div>

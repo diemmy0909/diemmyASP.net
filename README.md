@@ -1,4 +1,4 @@
-# 🤖 DiemMyCMS - Nền tảng Thương mại Điện tử Mô hình Đồ chơi & Figure
+# DiemMyCMS - Nền tảng Thương mại Điện tử Mô hình Đồ chơi & Figure
 
 Chào mừng bạn đến với **DiemMyCMS** - một hệ thống Thương mại điện tử (E-commerce) và Quản trị nội dung (CMS) toàn diện, được thiết kế chuyên biệt cho việc **kinh doanh mô hình đồ chơi sưu tầm**. 
 

@@ -35,6 +35,8 @@
                 <th>Danh mục</th>
                 <th>Giá</th>
                 <th>Tồn kho</th>
+                <th>Đã bán</th>
+                <th>Tình trạng</th>
                 <th>Thao tác</th>
             </tr>
         </thead>
@@ -70,6 +72,17 @@
                         else
                         {
                             <span class="badge bg-success">Còn hàng (@item.StockQuantity)</span>
+                        }
+                    </td>
+                    <td>@item.SoldCount</td>
+                    <td>
+                        @if (item.IsUpcoming)
+                        {
+                            <span class="badge bg-info text-dark">Sắp ra mắt</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Đang bán</span>
                         }
                     </td>
                     <td>

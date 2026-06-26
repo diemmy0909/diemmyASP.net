@@ -30,6 +30,37 @@ namespace CMS.Backend.Controllers
             return View(orders);
         }
 
+        // GET: /Order/Details/5
+        public IActionResult Details(int id)
+        {
+            var order = _context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
+                .FirstOrDefault(o => o.Id == id);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            return View(order);
+        }
+
+        // GET: /Order/DetailsPartial/5
+        public IActionResult DetailsPartial(int id)
+        {
+            var order = _context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
+                .FirstOrDefault(o => o.Id == id);
+
+            if (order == null) return NotFound();
+
+            return PartialView("_DetailsModal", order);
+        }
+
         // GET: /Order/Create
         public IActionResult Create()
         {

@@ -27,10 +27,16 @@ namespace CMS.Backend.Controllers
         // URL: GET https://localhost:xxxx/api/posts
         // =====================================================================
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 12)
         {
-            var posts = _context.Posts
+            var query = _context.Posts.AsQueryable();
+            int totalCount = query.Count();
+            int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            var posts = query
                 .OrderByDescending(p => p.Id) // Sắp xếp bài mới nhất lên đầu
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(p => new {           // Chỉ lấy các trường cần thiết
                     p.Id,
                     p.Title,
@@ -41,7 +47,7 @@ namespace CMS.Backend.Controllers
                 .ToList();
 
             // Trả về kết quả dạng JSON với mã trạng thái 200 (Thành công)
-            return Ok(posts);
+            return Ok(new { items = posts, totalPages, currentPage = page, totalCount });
         }
 
         // =====================================================================
@@ -49,11 +55,17 @@ namespace CMS.Backend.Controllers
         // URL: GET https://localhost:xxxx/api/posts/category/{categoryId}
         // =====================================================================
         [HttpGet("category/{categoryId}")]
-        public IActionResult GetByCategory(int categoryId)
+        public IActionResult GetByCategory(int categoryId, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
         {
             // Lọc các bài viết có CategoryId trùng với ID truyền vào từ URL
-            var posts = _context.Posts
-                .Where(p => p.CategoryId == categoryId)
+            var query = _context.Posts.Where(p => p.CategoryId == categoryId);
+            int totalCount = query.Count();
+            int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            var posts = query
+                .OrderByDescending(p => p.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(p => new {
                     p.Id,
                     p.Title,
@@ -62,7 +74,7 @@ namespace CMS.Backend.Controllers
                 })
                 .ToList();
 
-            return Ok(posts);
+            return Ok(new { items = posts, totalPages, currentPage = page, totalCount });
         }
 
         // =====================================================================

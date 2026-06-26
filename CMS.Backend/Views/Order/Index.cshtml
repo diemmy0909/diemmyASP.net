@@ -64,6 +64,7 @@
                     <td>@(item.Notes ?? "Không có")</td>
                     <td>
                         <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-info text-white" onclick="viewDetails(@item.Id)">Chi tiết</button>
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Sửa</a>
                             <form asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');">
                                 @Html.AntiForgeryToken()
@@ -76,3 +77,52 @@
         </tbody>
     </table>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">📦 Chi Tiết Đơn Hàng</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="orderDetailContent">
+        <!-- Content loaded via AJAX -->
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Đang tải dữ liệu...</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    <script>
+        function viewDetails(id) {
+            // Hiển thị modal ngay lập tức với trạng thái loading
+            $('#orderDetailContent').html(`
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Đang tải dữ liệu...</p>
+                </div>
+            `);
+            var myModal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
+            myModal.show();
+
+            // Gọi AJAX để lấy dữ liệu PartialView
+            $.get('/Order/DetailsPartial/' + id, function (data) {
+                $('#orderDetailContent').html(data);
+            }).fail(function() {
+                $('#orderDetailContent').html('<div class="alert alert-danger">Đã có lỗi xảy ra khi lấy dữ liệu.</div>');
+            });
+        }
+    </script>
+}

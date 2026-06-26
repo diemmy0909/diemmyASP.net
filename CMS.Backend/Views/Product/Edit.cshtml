@@ -54,6 +54,15 @@
         </div>
 
         <div class="mb-3">
+            <div class="form-check mb-2">
+                <input asp-for="IsUpcoming" class="form-check-input" type="checkbox" />
+                <label asp-for="IsUpcoming" class="form-check-label fw-bold">
+                    Sắp phát hành
+                </label>
+            </div>
+        </div>
+
+        <div class="mb-3">
             <label asp-for="Description" class="form-label fw-bold">Mô tả</label>
             <textarea asp-for="Description" class="form-control" rows="3"></textarea>
             <span asp-validation-for="Description" class="text-danger"></span>

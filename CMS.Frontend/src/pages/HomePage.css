@@ -1,14 +1,79 @@
-/* Fahasa Style Overrides for HomePage */
+/* Fahasa/CellphoneS Style Overrides for HomePage */
 .home-page-custom {
   background-color: #f5f5f5;
   padding: 20px 15px;
 }
 
-/* Banners */
-.f-banners {
+/* Top Section Layout */
+.home-top-section {
   display: flex;
   gap: 15px;
   margin-bottom: 25px;
+}
+
+/* Sidebar Menu */
+.sidebar-menu {
+  flex: 0 0 250px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-menu li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sidebar-menu li:hover {
+  background-color: #f8f9fa;
+}
+
+.sidebar-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-icon {
+  display: flex;
+  color: #444;
+  transition: color 0.2s;
+}
+
+.sidebar-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  transition: color 0.2s;
+}
+
+.sidebar-menu li:hover .sidebar-icon,
+.sidebar-menu li:hover .sidebar-text {
+  color: #d70018; /* CellphoneS Red */
+}
+
+.sidebar-arrow {
+  color: #999;
+}
+
+/* Banners */
+.f-banners {
+  flex: 1;
+  display: flex;
+  gap: 15px;
 }
 
 .f-banner-left {
@@ -261,6 +326,8 @@
   .f-product-grid { grid-template-columns: repeat(5, 1fr); }
 }
 @media (max-width: 992px) {
+  .home-top-section { flex-direction: column; }
+  .sidebar-menu { flex: auto; }
   .f-product-grid { grid-template-columns: repeat(4, 1fr); }
   .f-banners { flex-direction: column; }
 }

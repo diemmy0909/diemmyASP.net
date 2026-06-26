@@ -6,10 +6,24 @@ import api from '../api';
 function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialCategory = searchParams.get('category') ? parseInt(searchParams.get('category')) : 'all';
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [loading, setLoading] = useState(true);
-  const [searchParams] = useSearchParams();
   const searchKeyword = searchParams.get('search') || '';
+  
+  const currentPage = parseInt(searchParams.get('page')) || 1;
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Đồng bộ category từ URL vào state khi có thay đổi
+  useEffect(() => {
+    const catId = searchParams.get('category');
+    if (catId) {
+      setSelectedCategory(parseInt(catId));
+    } else {
+      setSelectedCategory('all');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     api.get('/categoryproducts')
@@ -19,11 +33,18 @@ function ProductsPage() {
 
   useEffect(() => {
     setLoading(true);
-    const url = selectedCategory === 'all' ? '/products' : `/products/category/${selectedCategory}`;
+    let url = selectedCategory === 'all' ? `/products?page=${currentPage}` : `/products/category/${selectedCategory}?page=${currentPage}`;
+    if (searchKeyword && selectedCategory === 'all') {
+      url += `&search=${encodeURIComponent(searchKeyword)}`;
+    }
     api.get(url)
-      .then(res => { setProducts(res.data); setLoading(false); })
+      .then(res => { 
+        setProducts(res.data.items || []); 
+        setTotalPages(res.data.totalPages || 1);
+        setLoading(false); 
+      })
       .catch(err => { console.error(err); setLoading(false); });
-  }, [selectedCategory]);
+  }, [selectedCategory, currentPage, searchKeyword]);
 
   const formatPrice = (price) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -59,17 +80,28 @@ function ProductsPage() {
     alert(`Đã thêm "${product.name}" vào giỏ hàng!`);
   };
 
+  const getPageTitle = () => {
+    if (searchKeyword) return `Kết quả tìm kiếm cho: "${searchKeyword}"`;
+    if (selectedCategory !== 'all') {
+      const cat = categories.find(c => c.id === selectedCategory);
+      return cat ? `Danh mục: ${cat.name}` : 'Sản phẩm theo danh mục';
+    }
+    return 'Tất Cả Sản Phẩm';
+  };
+
   return (
     <div className="container section-padding">
       <h1 className="page-title">
-        {searchKeyword ? `Kết quả tìm kiếm cho: "${searchKeyword}"` : 'Tất Cả Sản Phẩm'}
+        {getPageTitle()}
       </h1>
 
-      {/* Category filter */}
       <div className="filter-bar">
         <button
           className={`filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
-          onClick={() => setSelectedCategory('all')}
+          onClick={() => {
+            setSelectedCategory('all');
+            setSearchParams(searchKeyword ? { search: searchKeyword, page: 1 } : { page: 1 });
+          }}
         >
           Tất cả
         </button>
@@ -77,7 +109,10 @@ function ProductsPage() {
           <button
             key={cat.id}
             className={`filter-btn ${selectedCategory === cat.id ? 'active' : ''}`}
-            onClick={() => setSelectedCategory(cat.id)}
+            onClick={() => {
+              setSelectedCategory(cat.id);
+              setSearchParams(searchKeyword ? { search: searchKeyword, category: cat.id, page: 1 } : { category: cat.id, page: 1 });
+            }}
           >
             {cat.name}
           </button>
@@ -92,10 +127,8 @@ function ProductsPage() {
         <div className="f-product-grid" style={{ gap: '20px', padding: 0 }}>
           {filteredProducts.map(product => (
             <Link to={`/products/${product.id}`} key={product.id} className="f-product-card" style={{ textDecoration: 'none' }}>
-              <div className="f-discount-circle">25%</div>
               <div className="f-price-container">
                 <div className="f-price-rect">{formatPrice(product.price)}</div>
-                <div className="f-old-price">{formatPrice(product.price * 1.33)}</div>
               </div>
 
               <div className="f-img-wrapper">
@@ -124,6 +157,56 @@ function ProductsPage() {
               </div>
             </Link>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && totalPages > 1 && (
+        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '30px' }}>
+          <button 
+            disabled={currentPage === 1}
+            onClick={() => {
+              const newParams = new URLSearchParams(searchParams);
+              newParams.set('page', currentPage - 1);
+              setSearchParams(newParams);
+            }}
+            style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '4px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+          >
+            Trang trước
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+            <button
+              key={page}
+              onClick={() => {
+                const newParams = new URLSearchParams(searchParams);
+                newParams.set('page', page);
+                setSearchParams(newParams);
+              }}
+              style={{
+                padding: '8px 12px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                backgroundColor: currentPage === page ? 'var(--primary)' : '#fff',
+                color: currentPage === page ? '#fff' : '#333'
+              }}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button 
+            disabled={currentPage === totalPages}
+            onClick={() => {
+              const newParams = new URLSearchParams(searchParams);
+              newParams.set('page', currentPage + 1);
+              setSearchParams(newParams);
+            }}
+            style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '4px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+          >
+            Trang sau
+          </button>
         </div>
       )}
     </div>

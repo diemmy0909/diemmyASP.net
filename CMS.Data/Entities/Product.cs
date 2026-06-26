@@ -27,6 +27,10 @@ namespace CMS.Data.Entities
 
         public string? ImageUrl { get; set; }
 
+        public int SoldCount { get; set; } = 0; // Số lượng đã bán
+
+        public bool IsUpcoming { get; set; } = false; // Sắp phát hành
+
         // Khóa ngoại nối tới CategoryProduct
         public int CategoryProductId { get; set; }
 

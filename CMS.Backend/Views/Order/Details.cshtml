@@ -1,0 +1,106 @@
+@model CMS.Data.Entities.Order
+
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>🧾 Chi Tiết Đơn Hàng #@Model.Id</h2>
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Thông tin chung</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Khách hàng:</strong> @(Model.Customer?.FullName ?? "Không rõ")</p>
+                    <p><strong>Số điện thoại:</strong> @(Model.Customer?.Phone ?? "Không rõ")</p>
+                    <p><strong>Email:</strong> @(Model.Customer?.Email ?? "Không rõ")</p>
+                    <p><strong>Địa chỉ:</strong> @(Model.Customer?.Address ?? "Không rõ")</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Ngày đặt:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p>
+                        <strong>Trạng thái:</strong> 
+                        @switch (Model.Status)
+                        {
+                            case 0:
+                                <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                                break;
+                            case 1:
+                                <span class="badge bg-info text-dark">Đang giao</span>
+                                break;
+                            case 2:
+                                <span class="badge bg-success">Đã xong</span>
+                                break;
+                            default:
+                                <span class="badge bg-secondary">Không rõ</span>
+                                break;
+                        }
+                    </p>
+                    <p><strong>Ghi chú:</strong> @(Model.Notes ?? "Không có")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Danh sách sản phẩm</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-bordered table-striped align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Hình ảnh</th>
+                        <th class="text-end">Đơn giá</th>
+                        <th class="text-end">Số lượng</th>
+                        <th class="text-end">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+                    {
+                        decimal totalSum = 0;
+                        foreach (var item in Model.OrderDetails)
+                        {
+                            var lineTotal = item.Quantity * item.UnitPrice;
+                            totalSum += lineTotal;
+                            <tr>
+                                <td>@(item.Product?.Name ?? "Sản phẩm không tồn tại")</td>
+                                <td>
+                                    @if (item.Product != null && !string.IsNullOrEmpty(item.Product.ImageUrl))
+                                    {
+                                        <img src="@item.Product.ImageUrl" alt="@item.Product.Name" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không có ảnh</span>
+                                    }
+                                </td>
+                                <td class="text-end">@item.UnitPrice.ToString("N0") ₫</td>
+                                <td class="text-end">@item.Quantity</td>
+                                <td class="text-end fw-bold text-danger">@lineTotal.ToString("N0") ₫</td>
+                            </tr>
+                        }
+                        <tr class="table-group-divider">
+                            <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
+                            <td class="text-end fw-bold text-danger fs-5">@totalSum.ToString("N0") ₫</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Đơn hàng này chưa có sản phẩm nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,87 @@
+@model CMS.Data.Entities.Order
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <h6 class="text-primary border-bottom pb-2">Thông tin khách hàng</h6>
+        <p class="mb-1"><strong>Khách hàng:</strong> @(Model.Customer?.FullName ?? "Không rõ")</p>
+        <p class="mb-1"><strong>Số điện thoại:</strong> @(Model.Customer?.Phone ?? "Không rõ")</p>
+        <p class="mb-1"><strong>Email:</strong> @(Model.Customer?.Email ?? "Không rõ")</p>
+        <p class="mb-1"><strong>Địa chỉ:</strong> @(Model.Customer?.Address ?? "Không rõ")</p>
+    </div>
+    <div class="col-md-6">
+        <h6 class="text-primary border-bottom pb-2">Thông tin đơn hàng</h6>
+        <p class="mb-1"><strong>Mã đơn hàng:</strong> #@Model.Id</p>
+        <p class="mb-1"><strong>Ngày đặt:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+        <p class="mb-1">
+            <strong>Trạng thái:</strong> 
+            @switch (Model.Status)
+            {
+                case 0:
+                    <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                    break;
+                case 1:
+                    <span class="badge bg-info text-dark">Đang giao</span>
+                    break;
+                case 2:
+                    <span class="badge bg-success">Đã xong</span>
+                    break;
+                default:
+                    <span class="badge bg-secondary">Không rõ</span>
+                    break;
+            }
+        </p>
+        <p class="mb-1"><strong>Ghi chú:</strong> @(Model.Notes ?? "Không có")</p>
+    </div>
+</div>
+
+<h6 class="text-primary border-bottom pb-2">Danh sách sản phẩm</h6>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle mb-0" style="font-size: 13px;">
+        <thead class="table-light">
+            <tr>
+                <th>Sản phẩm</th>
+                <th>Hình ảnh</th>
+                <th class="text-end">Đơn giá</th>
+                <th class="text-end">SL</th>
+                <th class="text-end">Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+            {
+                decimal totalSum = 0;
+                foreach (var item in Model.OrderDetails)
+                {
+                    var lineTotal = item.Quantity * item.UnitPrice;
+                    totalSum += lineTotal;
+                    <tr>
+                        <td>@(item.Product?.Name ?? "Sản phẩm không tồn tại")</td>
+                        <td>
+                            @if (item.Product != null && !string.IsNullOrEmpty(item.Product.ImageUrl))
+                            {
+                                <img src="@item.Product.ImageUrl" alt="@item.Product.Name" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" />
+                            }
+                            else
+                            {
+                                <span class="text-muted" style="font-size: 11px;">Không có ảnh</span>
+                            }
+                        </td>
+                        <td class="text-end">@item.UnitPrice.ToString("N0") ₫</td>
+                        <td class="text-end">@item.Quantity</td>
+                        <td class="text-end fw-bold text-danger">@lineTotal.ToString("N0") ₫</td>
+                    </tr>
+                }
+                <tr class="table-group-divider">
+                    <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
+                    <td class="text-end fw-bold text-danger" style="font-size: 14px;">@totalSum.ToString("N0") ₫</td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Đơn hàng này chưa có sản phẩm nào.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

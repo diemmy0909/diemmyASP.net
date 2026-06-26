@@ -109,14 +109,12 @@ function Navbar() {
       <nav className="nav-bottom f-nav-bottom">
         <div className="container" style={{ display: 'flex', alignItems: 'center' }}>
           
-          <div className="f-category-btn">
-            <span style={{ fontSize: '18px', marginRight: '8px' }}>≡</span> NHÓM SẢN PHẨM
-          </div>
-
           <ul className="nav-list f-nav-list">
             <li><Link to="/">HOME</Link></li>
             <li><Link to="/products">SẢN PHẨM</Link></li>
+            <li><Link to="/sales">KHUYẾN MÃI</Link></li>
             <li><Link to="/posts">TIN TỨC</Link></li>
+            <li><Link to="/about">VỀ CHÚNG TÔI</Link></li>
             {!customerInfo && <li><Link to="/register">ĐĂNG KÝ</Link></li>}
           </ul>
         </div>

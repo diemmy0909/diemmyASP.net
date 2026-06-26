@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, Clock, ShoppingCart, Heart, RefreshCw, Star } from 'lucide-react';
+import { 
+  ChevronRight, Clock, ShoppingCart, Heart, RefreshCw, Star,
+  Smartphone, Laptop, Headphones, Watch, Home, Plug, Monitor, Tv, Package, Percent, Newspaper
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../api';
 import './HomePage.css';
@@ -13,18 +16,21 @@ function HomePage() {
   const [allProducts, setAllProducts] = useState([]);
   const [displayProducts, setDisplayProducts] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(true);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   
-  const [activeTab, setActiveTab] = useState('bestseller');
+  const [activeTab, setActiveTab] = useState('new');
 
   useEffect(() => {
     api.get('/products')
       .then(res => {
-        setAllProducts(res.data);
-        // Mặc định hiển thị tab Bán Chạy Nhất (sắp xếp random hoặc id cũ)
-        const bestseller = [...res.data].sort((a, b) => a.id - b.id).slice(0, 12);
-        setDisplayProducts(bestseller);
+        const productsData = res.data.items || [];
+        setAllProducts(productsData);
+        // Mặc định hiển thị tab Sản phẩm mới
+        const news = [...productsData].sort((a, b) => b.id - a.id).slice(0, 12);
+        setDisplayProducts(news);
         setLoadingProducts(false);
       })
       .catch(error => {
@@ -34,13 +40,24 @@ function HomePage() {
 
     api.get('/posts')
       .then(res => {
-        const latestPosts = res.data.sort((a, b) => b.id - a.id).slice(0, 3);
+        const postsData = res.data.items || [];
+        const latestPosts = postsData.sort((a, b) => b.id - a.id).slice(0, 3);
         setPosts(latestPosts);
         setLoadingPosts(false);
       })
       .catch(error => {
         console.error("Error fetching posts:", error);
         setLoadingPosts(false);
+      });
+
+    api.get('/categoryproducts')
+      .then(res => {
+        setCategories(res.data);
+        setLoadingCategories(false);
+      })
+      .catch(error => {
+        console.error("Error fetching categories:", error);
+        setLoadingCategories(false);
       });
   }, []);
 
@@ -50,13 +67,10 @@ function HomePage() {
     if (activeTab === 'new') {
       const news = [...allProducts].sort((a, b) => b.id - a.id).slice(0, 12);
       setDisplayProducts(news);
-    } else if (activeTab === 'upcoming') {
-      // Giả lập sắp phát hành bằng cách lấy các sản phẩm giữa
-      const upcoming = [...allProducts].slice(allProducts.length / 2).slice(0, 12);
-      setDisplayProducts(upcoming);
     } else {
-      const bestseller = [...allProducts].sort((a, b) => a.id - b.id).slice(0, 12);
-      setDisplayProducts(bestseller);
+      // Lấy các sản phẩm được đánh dấu sắp phát hành
+      const upcoming = allProducts.filter(p => p.isUpcoming).slice(0, 12);
+      setDisplayProducts(upcoming);
     }
   }, [activeTab, allProducts]);
 
@@ -97,21 +111,77 @@ function HomePage() {
     alert(`Đã thêm "${product.name}" vào giỏ hàng!`);
   };
 
+  const getCategoryIcon = (name) => {
+    if (!name) return <ChevronRight size={18} />;
+    const lowerName = name.toLowerCase();
+    if (lowerName.includes('điện thoại') || lowerName.includes('tablet') || lowerName.includes('smart')) return <Smartphone size={18} />;
+    if (lowerName.includes('laptop') || lowerName.includes('macbook')) return <Laptop size={18} />;
+    if (lowerName.includes('âm thanh') || lowerName.includes('tai nghe') || lowerName.includes('loa') || lowerName.includes('mic')) return <Headphones size={18} />;
+    if (lowerName.includes('đồng hồ') || lowerName.includes('camera')) return <Watch size={18} />;
+    if (lowerName.includes('gia dụng') || lowerName.includes('làm đẹp') || lowerName.includes('nhà')) return <Home size={18} />;
+    if (lowerName.includes('phụ kiện') || lowerName.includes('chuột') || lowerName.includes('phím') || lowerName.includes('cáp') || lowerName.includes('sạc')) return <Plug size={18} />;
+    if (lowerName.includes('màn hình') || lowerName.includes('pc') || lowerName.includes('máy tính') || lowerName.includes('máy in')) return <Monitor size={18} />;
+    if (lowerName.includes('tivi') || lowerName.includes('điện máy') || lowerName.includes('tv')) return <Tv size={18} />;
+    if (lowerName.includes('cũ') || lowerName.includes('đổi mới')) return <RefreshCw size={18} />;
+    if (lowerName.includes('khuyến mãi') || lowerName.includes('sale') || lowerName.includes('deal')) return <Percent size={18} />;
+    if (lowerName.includes('tin tức') || lowerName.includes('công nghệ') || lowerName.includes('báo')) return <Newspaper size={18} />;
+    return <Package size={18} />; // Default
+  };
+
   return (
     <main className="main-content container home-page-custom">
-      {/* 1. Banners Section */}
-      <div className="f-banners">
-        <div className="f-banner-left">
-          <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1200" alt="Sách truyền cảm hứng" />
-          <div className="banner-overlay">
-            <h2>Quyển Sách Thay Đổi Thế Giới</h2>
-          </div>
+      {/* Top Section with Sidebar and Banners */}
+      <div className="home-top-section">
+        <div className="sidebar-menu">
+          {loadingCategories ? (
+            <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>Đang tải...</div>
+          ) : categories.length === 0 ? (
+            <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>Chưa có danh mục</div>
+          ) : (
+            <ul>
+              {categories.map((category) => (
+                <li key={category.id}>
+                  <Link to={`/products?category=${category.id}`} className="sidebar-item-left" style={{ textDecoration: 'none', color: 'inherit', flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span className="sidebar-icon">{getCategoryIcon(category.name)}</span>
+                    <span className="sidebar-text">{category.name}</span>
+                  </Link>
+                  <ChevronRight size={16} className="sidebar-arrow" />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-        <div className="f-banner-right">
-          <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400" alt="Khuyến mãi" />
-          <div className="banner-overlay right-overlay">
-            <h3>-30%</h3>
-          </div>
+
+        {/* 1. Banners Section */}
+        <div className="f-banners">
+          {posts.length > 0 ? (
+            <Link to={`/posts/${posts[0].id}`} className="f-banner-left" style={{ textDecoration: 'none', color: 'inherit', display: 'block', position: 'relative' }}>
+              <img src={getImageUrl(posts[0].imageUrl, "https://images.unsplash.com/photo-1585366119957-e9730b6d0f60?auto=format&fit=crop&q=80&w=1200")} alt={posts[0].title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div className="banner-overlay">
+                <h2>{posts[0].title}</h2>
+              </div>
+            </Link>
+          ) : (
+            <div className="f-banner-left">
+              <img src="https://images.unsplash.com/photo-1585366119957-e9730b6d0f60?auto=format&fit=crop&q=80&w=1200" alt="Thế giới LEGO" />
+              <div className="banner-overlay">
+                <h2>Thế Giới LEGO Đầy Màu Sắc</h2>
+              </div>
+            </div>
+          )}
+
+          {allProducts.length > 0 ? (
+            <Link to={`/products/${allProducts[0].id}`} className="f-banner-right" style={{ textDecoration: 'none', display: 'block', position: 'relative' }}>
+              <img src={getImageUrl(allProducts[0].imageUrl, "/lego_discount_banner.png")} alt={allProducts[0].name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div className="banner-overlay" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.6))', color: 'white', position: 'absolute', bottom: 0, left: 0, right: 0, padding: '15px' }}>
+                <h3 style={{ fontSize: '18px', margin: 0, color: 'white' }}>Sản phẩm mới: {allProducts[0].name}</h3>
+              </div>
+            </Link>
+          ) : (
+            <div className="f-banner-right">
+              <img src="/lego_discount_banner.png" alt="Khuyến mãi" />
+            </div>
+          )}
         </div>
       </div>
 
@@ -119,9 +189,8 @@ function HomePage() {
       <section className="f-section">
         <div className="f-tab-header">
           <div className="f-tabs">
-            <button className={`f-tab ${activeTab === 'bestseller' ? 'active' : ''}`} onClick={() => setActiveTab('bestseller')}>BÁN CHẠY NHẤT</button>
+            <button className={`f-tab ${activeTab === 'new' ? 'active' : ''}`} onClick={() => setActiveTab('new')}>SẢN PHẨM MỚI</button>
             <button className={`f-tab ${activeTab === 'upcoming' ? 'active' : ''}`} onClick={() => setActiveTab('upcoming')}>SẮP PHÁT HÀNH</button>
-            <button className={`f-tab ${activeTab === 'new' ? 'active' : ''}`} onClick={() => setActiveTab('new')}>MỚI</button>
           </div>
           <Link to="/products" className="f-view-more">
             <ChevronRight size={18} color="#fff" fill="#fff" />
@@ -137,10 +206,8 @@ function HomePage() {
           <div className="f-product-grid">
             {displayProducts.map(product => (
               <Link to={`/products/${product.id}`} key={product.id} className="f-product-card" style={{ textDecoration: 'none' }}>
-                <div className="f-discount-circle">25%</div>
                 <div className="f-price-container">
                   <div className="f-price-rect">{formatPrice(product.price)}</div>
-                  <div className="f-old-price">{formatPrice(product.price * 1.33)}</div>
                 </div>
 
                 <div className="f-img-wrapper">

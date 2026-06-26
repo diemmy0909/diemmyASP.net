@@ -23,7 +23,7 @@ namespace CMS.Backend.Controllers
         /// <returns>Danh sách sản phẩm</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult GetAll([FromQuery] string? search = null, [FromQuery] int? categoryId = null)
+        public IActionResult GetAll([FromQuery] string? search = null, [FromQuery] int? categoryId = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
         {
             var query = _context.Products.AsQueryable();
 
@@ -37,36 +37,51 @@ namespace CMS.Backend.Controllers
                 query = query.Where(p => p.Name.Contains(search));
             }
 
+            int totalCount = query.Count();
+            int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
             var products = query
                 .OrderByDescending(p => p.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(p => new {
                     p.Id,
                     p.Name,
                     p.Price,
                     p.ImageUrl,
                     p.StockQuantity,
+                    p.IsUpcoming,
+                    p.SoldCount,
                     CategoryName = p.CategoryProduct != null ? p.CategoryProduct.Name : "Chưa phân loại"
                 })
                 .ToList();
 
-            return Ok(products);
+            return Ok(new { items = products, totalPages, currentPage = page, totalCount });
         }
 
         [HttpGet("category/{categoryId}")]
-        public IActionResult GetByCategory(int categoryId)
+        public IActionResult GetByCategory(int categoryId, [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
         {
-            var products = _context.Products
-                .Where(p => p.CategoryProductId == categoryId)
+            var query = _context.Products.Where(p => p.CategoryProductId == categoryId);
+            int totalCount = query.Count();
+            int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            var products = query
+                .OrderByDescending(p => p.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(p => new {
                     p.Id,
                     p.Name,
                     p.Price,
                     p.ImageUrl,
-                    p.StockQuantity
+                    p.StockQuantity,
+                    p.IsUpcoming,
+                    p.SoldCount,
                 })
                 .ToList();
 
-            return Ok(products);
+            return Ok(new { items = products, totalPages, currentPage = page, totalCount });
         }
 
         [HttpGet("{id}")]

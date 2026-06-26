@@ -4,7 +4,6 @@ import api from '../api';
 
 function CartPage() {
   const [cart, setCart] = useState([]);
-  const [notes, setNotes] = useState('');
   const navigate = useNavigate();
   const customerInfo = JSON.parse(localStorage.getItem('customerInfo'));
 
@@ -43,26 +42,9 @@ function CartPage() {
       return;
     }
     if (cart.length === 0) return;
-
-    const payload = {
-      customerId: customerInfo.id,
-      notes,
-      items: cart.map(item => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        unitPrice: item.price
-      }))
-    };
-
-    api.post('/orders', payload)
-      .then(res => {
-        alert(res.data.message || 'Đặt hàng thành công!');
-        localStorage.removeItem('cart');
-        setCart([]);
-        window.dispatchEvent(new Event('storage'));
-        navigate('/');
-      })
-      .catch(err => alert(err.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng'));
+    
+    // Navigate to checkout page
+    navigate('/checkout');
   };
 
   const totalAmount = cart.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -113,17 +95,6 @@ function CartPage() {
               <div className="summary-total">
                 <span>Tổng cộng:</span>
                 <span className="summary-total-price">{formatPrice(totalAmount)}</span>
-              </div>
-
-              <div style={{ marginBottom: '18px' }}>
-                <label className="form-label">Ghi chú đơn hàng:</label>
-                <textarea
-                  className="form-input form-textarea"
-                  rows="3"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Ghi chú thêm cho người bán..."
-                />
               </div>
 
               <button className="checkout-btn" onClick={handleCheckout}>

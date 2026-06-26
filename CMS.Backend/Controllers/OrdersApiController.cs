@@ -3,6 +3,8 @@ using CMS.Data;
 using CMS.Data.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace CMS.Backend.Controllers
 {
@@ -85,6 +87,45 @@ namespace CMS.Backend.Controllers
             {
                 transaction.Rollback();
                 return StatusCode(500, new { message = "Lỗi khi đặt hàng", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Lấy danh sách đơn hàng của một khách hàng
+        /// </summary>
+        [HttpGet("customer/{customerId}")]
+        public IActionResult GetCustomerOrders(int customerId)
+        {
+            try
+            {
+                var orders = _context.Orders
+                    .Where(o => o.CustomerId == customerId)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .OrderByDescending(o => o.OrderDate)
+                    .Select(o => new
+                    {
+                        o.Id,
+                        o.OrderDate,
+                        o.Status,
+                        o.Notes,
+                        TotalAmount = o.OrderDetails.Sum(od => od.Quantity * od.UnitPrice),
+                        Items = o.OrderDetails.Select(od => new
+                        {
+                            od.ProductId,
+                            od.Product.Name,
+                            od.Product.ImageUrl,
+                            od.Quantity,
+                            od.UnitPrice
+                        }).ToList()
+                    })
+                    .ToList();
+
+                return Ok(orders);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi lấy danh sách đơn hàng", error = ex.Message });
             }
         }
     }

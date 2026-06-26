@@ -82,5 +82,33 @@ namespace CMS.Backend.Controllers
 
             return Ok(new { message = "Đăng ký thành công" });
         }
+
+        public class UpdateModel
+        {
+            public string FullName { get; set; }
+            public string Phone { get; set; }
+            public string Address { get; set; }
+        }
+
+        /// <summary>
+        /// Cập nhật thông tin cá nhân khách hàng
+        /// </summary>
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, [FromBody] UpdateModel model)
+        {
+            var customer = _context.Customers.Find(id);
+            if (customer == null)
+            {
+                return NotFound(new { message = "Không tìm thấy khách hàng." });
+            }
+
+            customer.FullName = model.FullName;
+            customer.Phone = model.Phone;
+            customer.Address = model.Address;
+
+            _context.SaveChanges();
+
+            return Ok(new { message = "Cập nhật thành công" });
+        }
     }
 }

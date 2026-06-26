@@ -4,8 +4,6 @@ Chào mừng bạn đến với **DiemMyCMS** - một hệ thống Thương mạ
 
 Dự án là nơi giao lưu và mua sắm lý tưởng dành cho các tín đồ đam mê: **Mô hình Anime, Figure, Gundam, LEGO** và các bộ sưu tập giới hạn.
 
-![Banner](https://images.unsplash.com/photo-1535295972055-1c762f4483e5?auto=format&fit=crop&q=80&w=1200)
-
 ---
 
 ## 🌟 Chức năng nổi bật (Features)

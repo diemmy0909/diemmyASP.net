@@ -7,46 +7,87 @@
 <h2>@ViewData["Title"]</h2>
 
 <div class="row">
-    <div class="col-md-6">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="col-md-7">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="CreatedDate" />
+            <input type="hidden" asp-for="ImageUrl" />
 
             <div class="form-group mb-3">
-                <label asp-for="Title" class="control-label">Tiêu đề</label>
+                <label asp-for="Title" class="control-label fw-semibold">Tiêu đề Banner <span class="text-danger">*</span></label>
                 <input asp-for="Title" class="form-control" required />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
-            
+
             <div class="form-group mb-3">
-                <label asp-for="ImageUrl" class="control-label">URL Hình ảnh</label>
-                <input asp-for="ImageUrl" class="form-control" />
-                <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                <label class="control-label fw-semibold">Hình ảnh Banner</label>
+                <div class="card p-3 border-dashed" style="border: 2px dashed #dee2e6; border-radius: 8px; background: #f8f9fa;">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <div class="mb-2">
+                            <p class="text-muted mb-1">Ảnh hiện tại:</p>
+                            <img src="@Model.ImageUrl" alt="@Model.Title" style="max-width: 100%; max-height: 200px; border-radius: 6px; object-fit: cover;" />
+                        </div>
+                    }
+                    <input type="file" name="imageFile" id="imageFile" accept="image/*" class="form-control mb-2" onchange="previewImage(this)" />
+                    <small class="text-muted">Chọn ảnh mới để thay thế. Để trống nếu giữ nguyên ảnh cũ.</small>
+                    <div id="imagePreview" class="mt-2" style="display:none;">
+                        <p class="text-success mb-1"><i class="bi bi-check-circle"></i> Xem trước ảnh mới:</p>
+                        <img id="previewImg" src="" alt="Xem trước" style="max-width: 100%; max-height: 250px; border-radius: 6px; object-fit: cover;" />
+                    </div>
+                </div>
             </div>
-            
+
             <div class="form-group mb-3">
-                <label asp-for="LinkUrl" class="control-label">Đường dẫn khi click</label>
-                <input asp-for="LinkUrl" class="form-control" />
+                <label asp-for="LinkUrl" class="control-label fw-semibold">Đường dẫn khi click (tùy chọn)</label>
+                <input asp-for="LinkUrl" class="form-control" placeholder="https://... hoặc /products" />
+                <small class="text-muted">Để trống nếu banner không cần link</small>
                 <span asp-validation-for="LinkUrl" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="DisplayOrder" class="control-label">Thứ tự hiển thị</label>
-                <input asp-for="DisplayOrder" class="form-control" type="number" />
-                <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="DisplayOrder" class="control-label fw-semibold">Thứ tự hiển thị</label>
+                        <input asp-for="DisplayOrder" class="form-control" type="number" min="0" />
+                        <small class="text-muted">Số nhỏ hơn sẽ hiển thị trước</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3 pt-2">
+                        <label class="control-label fw-semibold d-block">Trạng thái</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" asp-for="IsActive" style="width: 40px; height: 20px;" />
+                            <label class="form-check-label ms-2" asp-for="IsActive">Hiển thị Banner</label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group form-check mb-3">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
-                </label>
-            </div>
-
-            <div class="form-group">
+            <div class="d-flex gap-2 mt-3">
                 <input type="submit" value="Lưu thay đổi" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+                <a asp-action="Index" class="btn btn-outline-secondary">Quay lại</a>
             </div>
         </form>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    function previewImage(input) {
+        var preview = document.getElementById('imagePreview');
+        var img = document.getElementById('previewImg');
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+</script>
+}

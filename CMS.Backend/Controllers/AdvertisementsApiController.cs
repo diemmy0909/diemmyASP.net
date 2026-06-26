@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace CMS.Backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/advertisements")]
     [ApiController]
     public class AdvertisementsApiController : ControllerBase
     {

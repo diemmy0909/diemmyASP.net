@@ -75,7 +75,7 @@ function HomePage() {
     <main className="main-content container home-page-custom">
       <div className="home-top-section">
         <CategoryMenu categories={categories} loadingCategories={loadingCategories} />
-        <HeroBanner posts={posts} allProducts={allProducts} />
+        <HeroBanner />
       </div>
 
       <ProductGrid 

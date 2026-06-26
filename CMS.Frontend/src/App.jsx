@@ -15,6 +15,7 @@ import LoginPage from './pages/auth/Login';
 import RegisterPage from './pages/auth/Register';
 import ProfilePage from './pages/profile';
 import OrdersPage from './pages/orders';
+import ComingSoonPage from './pages/ComingSoonPage';
 
 import './App.css';
 
@@ -35,6 +36,8 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/promotions" element={<ComingSoonPage title="Trang Khuyến mãi" />} />
+          <Route path="/about" element={<ComingSoonPage title="Về Chúng Tôi" />} />
         </Routes>
         <Footer />
       </div>

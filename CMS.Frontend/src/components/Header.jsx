@@ -112,7 +112,7 @@ function Header() {
           <ul className="nav-list f-nav-list">
             <li><Link to="/">HOME</Link></li>
             <li><Link to="/products">SẢN PHẨM</Link></li>
-            <li><Link to="/sales">KHUYẾN MÃI</Link></li>
+            <li><Link to="/promotions">KHUYẾN MÃI</Link></li>
             <li><Link to="/posts">TIN TỨC</Link></li>
             <li><Link to="/about">VỀ CHÚNG TÔI</Link></li>
             {!customerInfo && <li><Link to="/register">ĐĂNG KÝ</Link></li>}

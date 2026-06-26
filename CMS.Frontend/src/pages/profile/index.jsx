@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, MapPin, Save } from 'lucide-react';
-import api from '../api';
+import axiosClient from '../../api/axiosClient';
 
 function ProfilePage() {
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ function ProfilePage() {
     setLoading(true);
     setMessage('');
     
-    api.put(`/customers/${customer.id}`, { fullName, phone, address })
+    axiosClient.put(`/customers/${customer.id}`, { fullName, phone, address })
       .then(res => {
         // Update local storage
         const updatedInfo = { ...customer, fullName, phone, address };

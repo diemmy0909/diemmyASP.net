@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../api';
+import axiosClient from '../../api/axiosClient';
 
 function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -16,7 +16,7 @@ function RegisterPage() {
   const handleRegister = (e) => {
     e.preventDefault();
     setLoading(true);
-    api.post('/customers/register', formData)
+    axiosClient.post('/customers/register', formData)
       .then(() => {
         alert('Đăng ký thành công! Vui lòng đăng nhập.');
         navigate('/login');

@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import api from '../api';
+import { blogService } from '../../services/blogService';
 
-function PostDetailPage() {
+const BACKEND_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5188';
+
+function BlogDetail() {
   const { id } = useParams();
   const [post, setPost] = useState(null);
 
   useEffect(() => {
-    api.get(`/posts/${id}`)
+    blogService.getPostById(id)
       .then(res => setPost(res.data))
       .catch(err => console.error(err));
   }, [id]);
 
   const getImg = (url) => {
     if (!url) return null;
-    return url.startsWith('http') ? url : `http://localhost:5188${url}`;
+    return url.startsWith('http') ? url : `${BACKEND_URL}${url}`;
   };
 
   const formatDate = (dateString) => {
@@ -56,4 +58,4 @@ function PostDetailPage() {
   );
 }
 
-export default PostDetailPage;
+export default BlogDetail;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../api';
+import { orderService } from '../../services/orderService';
 
 function CheckoutPage() {
   const [cart, setCart] = useState([]);
@@ -69,7 +69,7 @@ function CheckoutPage() {
       }))
     };
 
-    api.post('/orders', payload)
+    orderService.createOrder(payload)
       .then(res => {
         alert(res.data.message || 'Đặt hàng thành công!');
         localStorage.removeItem('cart');

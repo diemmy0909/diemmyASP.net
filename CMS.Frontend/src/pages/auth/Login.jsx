@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../api';
+import axiosClient from '../../api/axiosClient';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,7 +11,7 @@ function LoginPage() {
   const handleLogin = (e) => {
     e.preventDefault();
     setLoading(true);
-    api.post('/customers/login', { email, password })
+    axiosClient.post('/customers/login', { email, password })
       .then(res => {
         localStorage.setItem('customerInfo', JSON.stringify(res.data));
         window.dispatchEvent(new Event('storage'));

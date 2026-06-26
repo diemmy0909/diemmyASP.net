@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, User, MapPin } from 'lucide-react';
 import '../App.css';
 
-function Navbar() {
+function Header() {
   const navigate = useNavigate();
   const [customerInfo, setCustomerInfo] = useState(() =>
     JSON.parse(localStorage.getItem('customerInfo'))
@@ -123,4 +123,4 @@ function Navbar() {
   );
 }
 
-export default Navbar;
+export default Header;

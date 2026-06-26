@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import api from '../api';
+import { productService } from '../../services/productService';
+import ProductInfo from './ProductInfo';
+
+const BACKEND_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5188';
 
 function ProductDetailPage() {
   const { id } = useParams();
@@ -9,18 +12,15 @@ function ProductDetailPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get(`/products/${id}`)
+    productService.getProductById(id)
       .then(res => setProduct(res.data))
       .catch(err => console.error(err));
   }, [id]);
 
   const getImg = (url) => {
     if (!url) return null;
-    return url.startsWith('http') ? url : `http://localhost:5188${url}`;
+    return url.startsWith('http') ? url : `${BACKEND_URL}${url}`;
   };
-
-  const formatPrice = (price) =>
-    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
   const addToCart = () => {
     if (!product) return;
@@ -30,7 +30,6 @@ function ProductDetailPage() {
       return;
     }
 
-    // Kiểm tra đăng nhập
     const customerInfo = localStorage.getItem('customerInfo');
     if (!customerInfo) {
       alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
@@ -66,7 +65,6 @@ function ProductDetailPage() {
       <Link to="/products" className="back-link">← Quay lại danh sách sản phẩm</Link>
 
       <div className="product-detail-wrapper">
-        {/* Image */}
         <div className="product-detail-img">
           {getImg(product.imageUrl) ? (
             <img src={getImg(product.imageUrl)} alt={product.name} />
@@ -77,39 +75,12 @@ function ProductDetailPage() {
           )}
         </div>
 
-        {/* Info */}
-        <div className="product-detail-info">
-          <div className="product-detail-category">{product.categoryName}</div>
-          <h1 className="product-detail-name">{product.name}</h1>
-          <div className="product-detail-price">{formatPrice(product.price)}</div>
-          <div className="product-detail-stock">
-            {product.stockQuantity > 0 
-              ? `✓ Còn hàng (${product.stockQuantity} sản phẩm)` 
-              : <span style={{color: '#dc3545'}}>❌ Hết hàng</span>}
-          </div>
-          <div className="product-detail-desc">
-            {product.description || 'Sản phẩm chất lượng cao, đảm bảo nguồn gốc xuất xứ rõ ràng.'}
-          </div>
-
-          {/* Quantity */}
-          <div className="qty-control">
-            <button className="qty-btn" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={product.stockQuantity === 0}>−</button>
-            <span className="qty-value">{product.stockQuantity === 0 ? 0 : quantity}</span>
-            <button className="qty-btn" onClick={() => setQuantity(Math.min(product.stockQuantity, quantity + 1))} disabled={product.stockQuantity === 0}>+</button>
-          </div>
-
-          <button 
-            className="btn-add-cart" 
-            onClick={addToCart}
-            disabled={product.stockQuantity === 0}
-            style={{ 
-              backgroundColor: product.stockQuantity === 0 ? '#ccc' : 'var(--primary)',
-              cursor: product.stockQuantity === 0 ? 'not-allowed' : 'pointer'
-            }}
-          >
-            {product.stockQuantity === 0 ? '❌ Hết Hàng' : '🛒 Thêm vào giỏ hàng'}
-          </button>
-        </div>
+        <ProductInfo 
+          product={product} 
+          quantity={quantity} 
+          setQuantity={setQuantity} 
+          addToCart={addToCart} 
+        />
       </div>
     </div>
   );

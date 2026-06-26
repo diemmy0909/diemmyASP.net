@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../api';
+import CartTable from './CartTable';
 
 function CartPage() {
   const [cart, setCart] = useState([]);
@@ -10,11 +10,6 @@ function CartPage() {
   useEffect(() => {
     setCart(JSON.parse(localStorage.getItem('cart')) || []);
   }, []);
-
-  const getImg = (url) => {
-    if (!url) return 'https://via.placeholder.com/90';
-    return url.startsWith('http') ? url : `http://localhost:5188${url}`;
-  };
 
   const formatPrice = (price) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -43,7 +38,6 @@ function CartPage() {
     }
     if (cart.length === 0) return;
     
-    // Navigate to checkout page
     navigate('/checkout');
   };
 
@@ -60,24 +54,8 @@ function CartPage() {
         </div>
       ) : (
         <div className="cart-wrapper">
-          {/* Items */}
-          <div className="cart-items">
-            {cart.map((item, index) => (
-              <div key={index} className="cart-item">
-                <img src={getImg(item.imageUrl)} alt={item.name} />
-                <div className="cart-item-info">
-                  <div className="cart-item-name">{item.name}</div>
-                  <div className="cart-item-price">{formatPrice(item.price)}</div>
-                </div>
-                <div className="cart-qty-control">
-                  <button className="cart-qty-btn" onClick={() => updateQuantity(index, -1)}>−</button>
-                  <span className="cart-qty-val">{item.quantity}</span>
-                  <button className="cart-qty-btn" onClick={() => updateQuantity(index, 1)}>+</button>
-                </div>
-                <button className="cart-remove-btn" onClick={() => removeItem(index)}>×</button>
-              </div>
-            ))}
-          </div>
+          
+          <CartTable cart={cart} updateQuantity={updateQuantity} removeItem={removeItem} />
 
           {/* Summary */}
           <div className="cart-summary">

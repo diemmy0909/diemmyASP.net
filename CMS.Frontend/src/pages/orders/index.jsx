@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api';
+import { orderService } from '../../services/orderService';
 import './OrdersPage.css';
 
 const BACKEND_URL = "http://localhost:5188";
@@ -20,7 +20,7 @@ function OrdersPage() {
 
     const customerInfo = JSON.parse(customerInfoStr);
     
-    api.get(`/orders/customer/${customerInfo.id}`)
+    orderService.getCustomerOrders(customerInfo.id)
       .then(res => {
         setOrders(res.data);
         setLoading(false);

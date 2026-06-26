@@ -1,32 +1,63 @@
-# DiemMyCMS
+# DiemMyCMS - Dự án ASP.NET Core & ReactJS
 
-Dự án Hệ thống quản trị nội dung và Cửa hàng trực tuyến DiemMyCMS.
-Dự án được xây dựng với cấu trúc phân tầng:
-- **CMS.Data**: Lớp truy cập dữ liệu (Entity Framework Core)
-- **CMS.Backend**: Lớp xử lý nghiệp vụ, Web API và giao diện quản trị (ASP.NET Core MVC & Web API)
-- **CMS.Frontend**: Giao diện cửa hàng dành cho khách hàng (ReactJS)
+Dự án này là hệ thống Quản trị nội dung và Cửa hàng trực tuyến (E-commerce) được phát triển theo lộ trình 8 buổi thực hành, sử dụng kiến trúc Backend ASP.NET Core MVC/WebAPI kết hợp với Frontend ReactJS.
 
-## Hướng dẫn chạy dự án
+---
 
-### 1. Chạy Backend (ASP.NET Core)
-1. Mở file solution `DiemMyCMS_SOLUTION.sln` bằng **Visual Studio**.
-2. Đảm bảo cấu hình chuỗi kết nối (`DefaultConnection`) tới SQL Server trong file `CMS.Backend/appsettings.json` là chính xác.
-3. Thiết lập dự án khởi chạy mặc định (Startup Project) là **CMS.Backend**.
-4. Nhấn phím **F5** (hoặc chọn Debug > Start Debugging) để biên dịch và chạy Backend.
-5. Trình duyệt sẽ tự động mở và Backend sẽ lắng nghe các Web API cũng như phục vụ giao diện Admin.
+## PHẦN 1: TỔNG QUAN & DATABASE (CHƯƠNG 1 & 2)
 
-### 2. Chạy FrontEnd (ReactJS)
-1. Mở một cửa sổ Terminal (hoặc Command Prompt).
-2. Di chuyển vào thư mục Frontend:
-   ```bash
-   cd CMS.Frontend
-   ```
-3. (Tùy chọn) Cài đặt các gói thư viện nếu đây là lần đầu chạy:
-   ```bash
-   npm install
-   ```
-4. Khởi động ứng dụng giao diện cửa hàng:
-   ```bash
-   npm start
-   ```
-5. Ứng dụng React sẽ khởi chạy (thường ở địa chỉ `http://localhost:3000`) và kết nối thành công tới Backend.
+### Buổi 1: Tổng quan .NET Core & C# Nâng cao
+- **Mục tiêu:** Cài đặt môi trường và hiểu cấu trúc Solution 3 lớp.
+- **Nội dung:** Giới thiệu .NET Core, Dependency Injection cơ bản, và cấu trúc thư mục Web API.
+- **Thực hành:** Khởi tạo Base Project; tạo các Class Entity đầu tiên (Category, Post).
+- **Giải thích:** Giúp làm quen với Visual Studio và cách tổ chức code chuyên nghiệp ngay từ đầu.
+
+### Buổi 2: EF Core & Migration (Trọng tâm Chương 2)
+- **Mục tiêu:** Thiết lập kết nối CSDL và tạo bảng tự động.
+- **Nội dung:** Cấu hình DbContext, Connection String trong `appsettings.json`, và các lệnh Migration.
+- **Thực hành:** Chạy `Add-Migration` và `Update-Database` để sinh ra CSDL CMS_DB.
+- **Giải thích:** Đây là bước "xương sống" để quản lý dữ liệu mà không cần viết SQL thủ công.
+
+### Buổi 3: Truy vấn LINQ & Thao tác dữ liệu chuyên sâu
+- **Mục tiêu:** Thành thạo các hàm xử lý dữ liệu của EF Core.
+- **Nội dung:** Truy vấn LINQ (Select, Where, Include), cách thêm/sửa/xóa dữ liệu.
+- **Thực hành:** Viết các hàm Logic xử lý dữ liệu cho Danh mục và Bài viết.
+- **Giải thích:** Giúp hiểu cách lấy dữ liệu từ SQL lên đối tượng C# để xử lý.
+
+---
+
+## PHẦN 2: BACKEND API & ADMIN PANEL (CHƯƠNG 3 & 4)
+
+### Buổi 4: ASP.NET Core MVC cho trang Quản trị
+- **Mục tiêu:** Xây dựng giao diện nhập liệu cho Admin.
+- **Nội dung:** Controller, View, Layout, và HTML Helpers.
+- **Thực hành:** Tạo các trang liệt kê và form thêm mới Danh mục/Bài viết bằng Razor View.
+- **Giải thích:** Nắm vững MVC để làm các trang quản trị nhanh chóng.
+
+### Buổi 5: Validation & Identity (Bảo mật)
+- **Mục tiêu:** Kiểm soát dữ liệu và phân quyền truy cập.
+- **Nội dung:** Data Annotations (kiểm tra tính hợp lệ) và ASP.NET Core Identity.
+- **Thực hành:** Thiết lập trang Đăng nhập cho Admin và ràng buộc dữ liệu cho form bài viết.
+- **Giải thích:** Đảm bảo chỉ người có quyền mới được sửa nội dung website.
+
+### Buổi 6: WebAPI RESTful Service (Trọng tâm Chương 4)
+- **Mục tiêu:** Cung cấp "cửa ngõ" dữ liệu cho ReactJS.
+- **Nội dung:** Định nghĩa Route, HTTP Methods (GET, POST, PUT, DELETE), và định dạng JSON.
+- **Thực hành:** Xây dựng các API lấy danh sách bài viết theo danh mục và chi tiết bài viết.
+- **Giải thích:** API là cầu nối để Backend và Frontend "nói chuyện" với nhau.
+
+---
+
+## PHẦN 3: FRONTEND REACTJS & KẾT NỐI (CHƯƠNG 4)
+
+### Buổi 7: Nhập môn ReactJS cho .NET
+- **Mục tiêu:** Hiểu cách xây dựng giao diện bằng Component.
+- **Nội dung:** Cài đặt Node.js, tạo Project React, JSX, Props, và State.
+- **Thực hành:** Tạo giao diện "Card" bài viết đơn giản.
+- **Giải thích:** Chuyển đổi tư duy từ Render phía Server sang Render phía Client.
+
+### Buổi 8: Gọi API từ ReactJS & useEffect
+- **Mục tiêu:** Hiển thị dữ liệu thực tế từ Database lên ReactJS.
+- **Nội dung:** Thư viện Axios, vòng đời Component (useEffect) để gọi API.
+- **Thực hành:** Gọi API bài viết từ Backend và hiển thị lên trang chủ React.
+- **Giải thích:** Đây là bước thực hiện mục tiêu "Sử dụng giao diện ReactJS gọi WebAPI" trong đề cương.
